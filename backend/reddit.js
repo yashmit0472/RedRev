@@ -24,7 +24,7 @@ function extractProductIdentity(title) {
 
     // Identify brand (first meaningful word) and model keywords
     const brand = cleaned[0] || '';
-    const modelWords = cleaned.slice(0, 5); // brand + up to 4 model words
+    const modelWords = cleaned.slice(0, 3); // brand + up to 2 model words
 
     return { brand, modelWords, fullClean: modelWords.join(' ') };
 }
@@ -70,7 +70,8 @@ async function getRedditPosts(query) {
         // Then merge and deduplicate
         const searches = [
             `"${fullClean}" review`,             // exact match
-            `${brand} ${modelWords.slice(1).join(' ')} review`  // broad match
+            `${brand} ${modelWords.slice(1).join(' ')} review`,  // broad match
+            `${brand} ${modelWords[1] || ''} review` // very broad fallback
         ];
 
         let allPosts = [];
@@ -121,9 +122,10 @@ async function getRedditPosts(query) {
         }));
 
         // Must at least contain the brand name AND have a minimum relevance
+        const minRelevance = modelWords.length > 1 ? 4 : 3;
         scored = scored.filter(p => {
             const content = (p.title + ' ' + p.text).toLowerCase();
-            return content.includes(brand) && p.relevance >= 3;
+            return content.includes(brand) && p.relevance >= minRelevance;
         });
 
         // Sort by relevance first, then upvotes as tiebreaker

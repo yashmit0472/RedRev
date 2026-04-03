@@ -1,13 +1,127 @@
 body {
-    font-family: Arial;
-    padding: 10px;
-    width: 300px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 12px 16px;
+    width: 320px;
+    margin: 0;
+    background: #1a1a2e;
+    color: #e0e0e0;
 }
 
 h2 {
-    margin-top: 0;
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 1px;
 }
 
-ul {
-    padding-left: 15px;
+.subtitle {
+    margin: 0 0 12px 0;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.3;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px 0;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.error {
+    text-align: center;
+    padding: 15px 0;
+    color: #ff6b6b;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.error code {
+    background: #2a2a3e;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #ffd93d;
+}
+
+/* Score display */
+.score-box {
+    text-align: center;
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.score-number {
+    font-size: 44px;
+    font-weight: 800;
+}
+
+.score-label {
+    font-size: 16px;
+    opacity: 0.6;
+}
+
+.score-good {
+    background: linear-gradient(135deg, #0a3d0a, #1a5c1a);
+    color: #4ade80;
+}
+
+.score-ok {
+    background: linear-gradient(135deg, #3d3a0a, #5c5a1a);
+    color: #fbbf24;
+}
+
+.score-bad {
+    background: linear-gradient(135deg, #3d0a0a, #5c1a1a);
+    color: #f87171;
+}
+
+.recommendation {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 14px 0;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Sections */
+.section {
+    margin-bottom: 10px;
+    background: #16213e;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.section h4 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+.section li {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 2px;
+    color: #ddd;
+}
+
+.footer {
+    text-align: center;
+    font-size: 10px;
+    color: #555;
+    margin: 10px 0 0 0;
+    border-top: 1px solid #2a2a3e;
+    padding-top: 8px;
 }
