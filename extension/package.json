@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "sentiment": "^5.0.2",
+    "snoowrap": "^1.23.0"
+  }
+}
