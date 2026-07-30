@@ -36,11 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         content.innerHTML = '<p class="loading">Analyzing reviews via Reddit + AI...<br>This may take 10-15 seconds.</p>';
 
         // Step 4: Call backend API
-        const res = await fetch("http://localhost:5000/analyze", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: productTitle })
-        });
+        const res = await fetchAnalysis(productTitle);
 
         if (!res.ok) {
             throw new Error("Server error: " + res.status);
@@ -56,10 +52,46 @@ document.addEventListener("DOMContentLoaded", async () => {
         displayResults(data);
 
     } catch (err) {
-        console.error("Popup error:", err);
-        content.innerHTML = '<p class="error">' + err.message + '<br><br>Make sure the backend server is running:<br><code>node server.js</code></p>';
+        console.warn("Popup request failed:", err);
+        content.innerHTML = '<p class="error">' + escapeHTML(err.message) + '<br><br>Make sure the backend server is running:<br><code>cd backend && node server.js</code></p>';
     }
 });
+
+async function fetchAnalysis(productTitle) {
+    const endpoints = [
+        "http://127.0.0.1:5000/analyze",
+        "http://localhost:5000/analyze"
+    ];
+
+    let lastError;
+    let reachedServer = false;
+
+    for (const endpoint of endpoints) {
+        try {
+            const res = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: productTitle })
+            });
+
+            if (!res.ok) {
+                reachedServer = true;
+                throw new Error("Server error: " + res.status);
+            }
+
+            reachedServer = true;
+            return res;
+        } catch (err) {
+            lastError = err;
+        }
+    }
+
+    if (reachedServer && lastError) {
+        throw lastError;
+    }
+
+    throw new Error("Backend server is not reachable");
+}
 
 function cleanProductTitle(raw) {
     // Split on common Amazon/Flipkart title separators

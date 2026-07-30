@@ -67,6 +67,15 @@ app.post('/analyze', async (req, res) => {
     }
 });
 
-app.listen(5000, () => {
-    console.log("🚀 Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+
+app.get("/", (req, res) => {
+    res.json({
+        message: "RedRev API is running",
+        endpoint: "POST /analyze"
+    });
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });

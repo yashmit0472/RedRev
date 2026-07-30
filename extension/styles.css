@@ -11,7 +11,21 @@ h2 {
     margin: 0 0 4px 0;
     font-size: 18px;
     color: #fff;
-    letter-spacing: 1px;
+    letter-spacing: 0;
+}
+
+.brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    margin-bottom: 8px;
+}
+
+.brand-logo {
+    display: block;
+    width: 175px;
+    height: auto;
 }
 
 .subtitle {

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 180" role="img" aria-labelledby="title">
+  <title id="title">RedRev logo</title>
+  <defs>
+    <linearGradient id="redMain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff2232"/>
+      <stop offset="0.48" stop-color="#ff001f"/>
+      <stop offset="1" stop-color="#b50019"/>
+    </linearGradient>
+    <linearGradient id="redLight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff2f3f"/>
+      <stop offset="1" stop-color="#ff001f"/>
+    </linearGradient>
+    <linearGradient id="darkEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2535"/>
+      <stop offset="1" stop-color="#09080f"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#050208" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+  <g filter="url(#softShadow)" transform="translate(4 20) scale(.42)">
+    <path d="M40 50c110 0 221 4 281 22 30 9 49 24 55 44 9 31-17 64-66 92l-72 40 65 76-92-35-71-76 112-61-134 12-78 85 24-89 132-43-126-7Z" fill="url(#redMain)"/>
+    <path d="M118 164l134-12-112 61-76 36 24-89Z" fill="url(#redLight)"/>
+    <path d="M146 199l164-91c17 18 10 39-15 61l-57 48Z" fill="url(#darkEdge)" opacity="0.92"/>
+    <path d="M164 209l74 39 65 76-92-35Z" fill="url(#redLight)"/>
+    <path d="M238 248l72-40-34 42 27 74Z" fill="#5c1021" opacity="0.55"/>
+    <path d="M40 50c112 1 221 7 286 29 28 10 42 24 49 39-31-21-97-31-211-37Z" fill="#ff4b56" opacity="0.55"/>
+  </g>
+  <text x="178" y="111" fill="url(#redMain)" font-family="Arial Black, Impact, Segoe UI Black, sans-serif" font-size="76" font-style="italic" font-weight="900" letter-spacing="-2">redrev</text>
+</svg>
