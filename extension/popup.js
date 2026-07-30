@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function fetchAnalysis(productTitle) {
     const endpoints = [
+        "   ",
         "http://127.0.0.1:5000/analyze",
         "http://localhost:5000/analyze"
     ];
