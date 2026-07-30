@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function fetchAnalysis(productTitle) {
     const endpoints = [
-        "   ",
+        "https://redrev.onrender.com/analyze",
         "http://127.0.0.1:5000/analyze",
         "http://localhost:5000/analyze"
     ];
