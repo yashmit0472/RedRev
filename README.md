@@ -46,6 +46,8 @@ The project is split into two main parts:
 3. Create a `.env` file in the `backend/` directory and add your Gemini API key:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
+   # Optional: defaults to gemini-3.5-flash-lite for faster, cheaper responses
+   GEMINI_MODEL=gemini-3.5-flash-lite
    ```
 4. Start the backend server:
    ```bash

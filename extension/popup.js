@@ -16,21 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Step 2: Extract product title from the page
         const results = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            func: () => {
-                // Amazon
-                let el = document.querySelector("#productTitle");
-                if (el) return el.innerText.trim();
-
-                // Flipkart
-                el = document.querySelector(".B_NuCI");
-                if (el) return el.innerText.trim();
-
-                // Flipkart alternate selector
-                el = document.querySelector("span.VU-ZEz");
-                if (el) return el.innerText.trim();
-
-                return null;
-            }
+            func: extractProductTitleFromPage
         });
 
         const rawTitle = results?.[0]?.result;
@@ -110,28 +96,66 @@ function cleanProductTitle(raw) {
     return title;
 }
 
+function extractProductTitleFromPage() {
+    const selectors = [
+        "#productTitle",
+        "#title",
+        "span.VU-ZEz",
+        ".B_NuCI",
+        "h1 span",
+        "h1"
+    ];
+
+    for (const selector of selectors) {
+        const el = document.querySelector(selector);
+        const text = el?.innerText?.trim();
+
+        if (text) return text;
+    }
+
+    const meta = document.querySelector(
+        'meta[property="og:title"], meta[name="title"], meta[name="twitter:title"]'
+    );
+    const metaTitle = meta?.content?.trim();
+
+    if (metaTitle) return metaTitle;
+
+    return document.title?.trim() || null;
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[char]));
+}
+
 function displayResults(r) {
     const content = document.getElementById("content");
 
-    const scoreClass = r.score >= 70 ? "score-good" : r.score >= 40 ? "score-ok" : "score-bad";
+    const score = Number.isFinite(Number(r.score)) ? Math.round(Number(r.score)) : 50;
+    const scoreClass = score >= 70 ? "score-good" : score >= 40 ? "score-ok" : "score-bad";
 
     const hasPros = r.pros && r.pros.length > 0 && r.pros[0] !== "Not enough reliable data";
     const hasCons = r.cons && r.cons.length > 0 && r.cons[0] !== "AI analysis failed or weak reviews";
 
     const prosHTML = hasPros
-        ? r.pros.map(function(p) { return "<li>" + p + "</li>"; }).join("")
+        ? r.pros.map(function(p) { return "<li>" + escapeHTML(p) + "</li>"; }).join("")
         : "<li>No detailed data available</li>";
 
     const consHTML = hasCons
-        ? r.cons.map(function(c) { return "<li>" + c + "</li>"; }).join("")
+        ? r.cons.map(function(c) { return "<li>" + escapeHTML(c) + "</li>"; }).join("")
         : "<li>No detailed data available</li>";
 
     content.innerHTML =
         '<div class="score-box ' + scoreClass + '">' +
-            '<span class="score-number">' + r.score + '</span>' +
+            '<span class="score-number">' + score + '</span>' +
             '<span class="score-label">/ 100</span>' +
         '</div>' +
-        '<p class="recommendation">' + r.recommendation + '</p>' +
+        '<p class="recommendation">' + escapeHTML(r.recommendation) + '</p>' +
         '<div class="section">' +
             '<h4>Pros</h4>' +
             '<ul>' + prosHTML + '</ul>' +

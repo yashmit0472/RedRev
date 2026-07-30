@@ -1,5 +1,13 @@
-// Uses Node.js built-in fetch (v18+) — NOT node-fetch
-// node-fetch gets blocked by Reddit's TLS fingerprint detection
+// Uses Node.js built-in fetch (v18+) — NOT node-fetch.
+// Reddit's public JSON search endpoint can return 403; RSS/Atom still works
+// for public search without OAuth.
+const cheerio = require('cheerio');
+const xml2js = require('xml2js');
+
+const REDDIT_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 RedRev/1.0',
+    'Accept': 'application/rss+xml,text/xml,application/json;q=0.9,*/*;q=0.8'
+};
 
 // Common filler words that match too many unrelated products
 const STOPWORDS = new Set([
@@ -55,6 +63,91 @@ function scoreRelevance(post, brand, modelWords) {
     return score;
 }
 
+function normalizeText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function extractTextFromHtml(html) {
+    if (!html) return '';
+
+    const $ = cheerio.load(html);
+    return normalizeText($.text());
+}
+
+function extractSubreddit(entry, contentText) {
+    const linkHref = entry?.link?.$?.href || entry?.link?.href || '';
+    const haystack = `${linkHref} ${contentText}`;
+    const match = haystack.match(/\/r\/([^/\s?#]+)/i);
+    return match ? match[1] : '';
+}
+
+function entryToPost(entry) {
+    const title = normalizeText(entry.title);
+    const content = extractTextFromHtml(entry.content?._ || entry.content);
+
+    return {
+        title,
+        text: content,
+        upvotes: 0,
+        subreddit: extractSubreddit(entry, content)
+    };
+}
+
+async function fetchRssPosts(searchQuery) {
+    const rssQuery = `${searchQuery} self:yes`;
+    const url = `https://www.reddit.com/search.rss?q=${encodeURIComponent(
+        rssQuery
+    )}&limit=25&sort=relevance&t=all&type=link`;
+
+    console.log('🔗 Reddit RSS search:', searchQuery);
+
+    const res = await fetch(url, { headers: REDDIT_HEADERS });
+
+    if (!res.ok) {
+        console.error(`❌ Reddit RSS returned ${res.status} for: ${searchQuery}`);
+        return [];
+    }
+
+    const xml = await res.text();
+    const parsed = await xml2js.parseStringPromise(xml, {
+        explicitArray: false,
+        trim: true
+    });
+
+    const entries = [].concat(parsed?.feed?.entry || []);
+
+    return entries
+        .filter(entry => String(entry?.id || '').startsWith('t3_'))
+        .map(entryToPost)
+        .filter(post => post.title || post.text);
+}
+
+async function fetchJsonPosts(searchQuery) {
+    const url = `https://api.reddit.com/search?q=${encodeURIComponent(
+        searchQuery
+    )}&limit=25&sort=relevance&t=all`;
+
+    console.log('🔗 Reddit JSON search:', searchQuery);
+
+    const res = await fetch(url, { headers: REDDIT_HEADERS });
+
+    if (!res.ok) {
+        console.error(`❌ Reddit JSON returned ${res.status} for: ${searchQuery}`);
+        return [];
+    }
+
+    const data = await res.json();
+
+    if (!data?.data?.children) return [];
+
+    return data.data.children.map(p => ({
+        title: p.data.title || '',
+        text: p.data.selftext || '',
+        upvotes: p.data.ups || 0,
+        subreddit: p.data.subreddit || ''
+    }));
+}
+
 async function getRedditPosts(query) {
     try {
         const { brand, modelWords, fullClean } = extractProductIdentity(query);
@@ -77,33 +170,17 @@ async function getRedditPosts(query) {
         let allPosts = [];
 
         for (const searchQuery of searches) {
-            const url = `https://api.reddit.com/search?q=${encodeURIComponent(
-                searchQuery
-            )}&limit=25&sort=relevance&t=all`;
+            let posts = await fetchRssPosts(searchQuery);
 
-            console.log('🔗 Reddit search:', searchQuery);
-
-            const res = await fetch(url, {
-                headers: { 'User-Agent': 'RedRevBot/1.0' }
-            });
-
-            if (!res.ok) {
-                console.error(`❌ Reddit returned ${res.status} for: ${searchQuery}`);
-                continue;
+            if (posts.length === 0) {
+                posts = await fetchJsonPosts(searchQuery);
             }
 
-            const data = await res.json();
-
-            if (!data?.data?.children) continue;
-
-            const posts = data.data.children.map(p => ({
-                title: p.data.title || '',
-                text: p.data.selftext || '',
-                upvotes: p.data.ups || 0,
-                subreddit: p.data.subreddit || ''
-            }));
-
             allPosts.push(...posts);
+
+            if (allPosts.length >= 10) {
+                break;
+            }
         }
 
         // Deduplicate by title
