@@ -36,13 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         content.innerHTML = '<p class="loading">Analyzing reviews via Reddit + AI...<br>This may take 10-15 seconds.</p>';
 
         // Step 4: Call backend API
-        const res = await fetchAnalysis(productTitle);
-
-        if (!res.ok) {
-            throw new Error("Server error: " + res.status);
-        }
-
-        const data = await res.json();
+        const data = await fetchAnalysis(productTitle);
 
         if (data.error) {
             throw new Error(data.error);
@@ -52,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         displayResults(data);
 
     } catch (err) {
-        console.warn("Popup request failed:", err);
+        console.debug("Popup request failed:", err);
         content.innerHTML = '<p class="error">' + escapeHTML(err.message) + '<br><br>Make sure the backend server is running:<br><code>cd backend && node server.js</code></p>';
     }
 });
@@ -64,8 +58,7 @@ async function fetchAnalysis(productTitle) {
         "http://localhost:5000/analyze"
     ];
 
-    let lastError;
-    let reachedServer = false;
+    let lastServerError;
 
     for (const endpoint of endpoints) {
         try {
@@ -75,20 +68,30 @@ async function fetchAnalysis(productTitle) {
                 body: JSON.stringify({ title: productTitle })
             });
 
-            if (!res.ok) {
-                reachedServer = true;
-                throw new Error("Server error: " + res.status);
+            const contentType = res.headers.get("content-type") || "";
+            const body = await res.text();
+
+            if (!contentType.includes("application/json")) {
+                throw new Error("Endpoint did not return JSON");
             }
 
-            reachedServer = true;
-            return res;
+            const data = JSON.parse(body);
+
+            if (!res.ok) {
+                lastServerError = new Error(data.error || "Server error: " + res.status);
+                throw lastServerError;
+            }
+
+            return data;
         } catch (err) {
-            lastError = err;
+            if (err === lastServerError) {
+                break;
+            }
         }
     }
 
-    if (reachedServer && lastError) {
-        throw lastError;
+    if (lastServerError) {
+        throw lastServerError;
     }
 
     throw new Error("Backend server is not reachable");
