@@ -20,8 +20,6 @@ app.post('/analyze', async (req, res) => {
             return res.status(400).json({ error: "Title required" });
         }
 
-        console.log("🔍 Analyzing:", title);
-
         // 🔹 STEP 1: Reddit
         let posts = await getRedditPosts(title);
 

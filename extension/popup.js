@@ -46,55 +46,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         displayResults(data);
 
     } catch (err) {
-        console.debug("Popup request failed:", err);
-        content.innerHTML = '<p class="error">' + escapeHTML(err.message) + '<br><br>Make sure the backend server is running:<br><code>cd backend && node server.js</code></p>';
+        content.innerHTML =
+            '<p class="error">RedRev could not analyze this product right now.<br><br>Please try again shortly.</p>';
     }
 });
 
 async function fetchAnalysis(productTitle) {
-    const endpoints = [
-        "https://redrev.onrender.com/analyze",
-        "http://127.0.0.1:5000/analyze",
-        "http://localhost:5000/analyze"
-    ];
+    const endpoint = "https://redrev.onrender.com/analyze";
+    const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: productTitle })
+    });
 
-    let lastServerError;
+    const contentType = res.headers.get("content-type") || "";
+    const body = await res.text();
 
-    for (const endpoint of endpoints) {
-        try {
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: productTitle })
-            });
-
-            const contentType = res.headers.get("content-type") || "";
-            const body = await res.text();
-
-            if (!contentType.includes("application/json")) {
-                throw new Error("Endpoint did not return JSON");
-            }
-
-            const data = JSON.parse(body);
-
-            if (!res.ok) {
-                lastServerError = new Error(data.error || "Server error: " + res.status);
-                throw lastServerError;
-            }
-
-            return data;
-        } catch (err) {
-            if (err === lastServerError) {
-                break;
-            }
-        }
+    if (!contentType.includes("application/json")) {
+        throw new Error("Server returned an invalid response");
     }
 
-    if (lastServerError) {
-        throw lastServerError;
+    const data = JSON.parse(body);
+
+    if (!res.ok) {
+        throw new Error(data.error || "Server error: " + res.status);
     }
 
-    throw new Error("Backend server is not reachable");
+    return data;
 }
 
 function cleanProductTitle(raw) {
