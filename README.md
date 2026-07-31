@@ -24,49 +24,26 @@ The project is split into two main parts:
 ### 2. Backend Server
 - `server.js`: An Express API exposing the `POST /analyze` endpoint.
 - `reddit.js`: Contains robust logic to clean complex product titles down to core brand/model keywords and queries `api.reddit.com` using native `node:fetch`. It filters and scores Reddit posts by relevance.
-- `scoreCalAI.js`: Packages the relevant Reddit reviews and prompts Gemini (via your `GEMINI_API_KEY`) to extract actionable pros, cons, and a numerical score. Implements rate-limit retry logic.
+- `scoreCalAI.js`: Packages the relevant Reddit reviews and prompts Gemini to extract actionable pros, cons, and a numerical score. Implements rate-limit retry logic.
 - `scorer.js`: Helper configuration to determine textual recommendations ("Buy", "Consider", "Avoid") from the 0-100 score.
 
-## Getting Started
+## 🚀 Getting Started
 
-### Prerequisites
-- Node.js (v18 or higher recommended to support native fetch)
-- Google Gemini API Key
+Great news! The **RedRev Backend Server** is fully deployed and running in the cloud ☁️, so you don't have to worry about setting up Node.js, API keys, or running a local server. 
 
-### Backend Setup
+However, since the frontend extension is not yet published to the Chrome Web Store, you will need to manually load the extension into your browser. It takes less than a minute!
 
-1. Navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the `backend/` directory and add your Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
-   # Optional: defaults to gemini-3.5-flash-lite for faster, cheaper responses
-   GEMINI_MODEL=gemini-3.5-flash-lite
-   ```
-4. Start the backend server:
-   ```bash
-   node server.js
-   ```
-   > The server will start on `http://localhost:5000`
+### 🛠️ Extension Setup (Chrome)
 
-### Extension Setup (Chrome)
-
-1. Open Google Chrome and go to `chrome://extensions/`
-2. Enable **Developer mode** using the toggle in the top right corner.
-3. Click **Load unpacked**.
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Toggle on **Developer mode** in the top right corner.
+3. Click the **Load unpacked** button.
 4. Select the `extension/` folder from this repository.
-5. The RedRev icon should appear in your Chrome toolbar. Pin it for quick access!
+5. 🎉 Boom! The RedRev icon should appear in your Chrome toolbar. *(Pro tip: Pin it for quick access!)*
 
-## Usage
+## 💡 Usage
 
-1. Start up your backend server (`node server.js`).
-2. Navigate to any product page on Amazon or Flipkart.
-3. Click the **RedRev** extension icon.
-4. Wait 10-15 seconds for the AI to analyze the Reddit posts.
-5. Enjoy your summarized product review!
+1. Navigate to any product page on **Amazon** or **Flipkart**.
+2. Click the **RedRev** extension icon in your toolbar.
+3. Sit back and wait a few seconds while our AI works its magic, fetching and summarizing real Reddit insights.
+4. Make an informed decision and enjoy your summarized product review!
